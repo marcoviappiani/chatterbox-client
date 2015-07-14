@@ -3,6 +3,8 @@
 var app = {
   init: function(){
     app.server = 'https://api.parse.com/1/classes/chatterbox';
+    app.rooms = ['Lobby'];
+    app.friends = [];
   },
   send: function(message){
     $.ajax({
@@ -22,18 +24,26 @@ var app = {
   },
   fetch: function(){
     var results;
-
+    var currentRoom = $('select :selected').text();
     $.ajax({
       // This is the url you should use to communicate with the parse API server.
       url: app.server,
       type: 'GET',
       contentType: 'application/json',
       success: function (data) {
-        console.log(data.results);
+        console.log('fetching');
         results = data['results'];
-
+        // console.log(results);
+        app.clearMessages();
         for(var i=0; i<results.length; i++){
-          app.addMessage(results[i]);
+          if(results[i]['roomname'] === currentRoom) {
+            app.addMessage(results[i]);
+          }
+
+          if(app.rooms.indexOf(results[i]['roomname']) === -1) {
+            app.addRoom(results[i]['roomname']);
+            app.rooms.push(results[i]['roomname']);
+          }
         }
       },
     });
@@ -53,54 +63,57 @@ var app = {
     var currentMessage = $('<div class="chat"><div class="username"> </div> <div class="message"> </div></div>');
     currentMessage.find('.username').text(message.username);
     currentMessage.find('.message').text(message.text);
-    $('#chats').prepend(currentMessage);
+    if(app.friends.indexOf(message.username) !== -1){
+      currentMessage.find('.message').addClass('friend');
+    }
+    $('#chats').append(currentMessage);
   },
   addRoom: function(room){
-    $('#roomSelect').append('<div>' + room + '</div>');
+    var roomNode = $('<option></option>');
+    roomNode.text(room);
+    $('#roomSelect select').append(roomNode);
   },
   addFriend: function(friend) {
-    console.log('clicked a friend');
-    //do stuff
+    console.log(friend);
+    if(app.friends.indexOf(friend) === -1){
+      app.friends.push(friend);
+    }
+    console.log(app.friends);
   },
   handleSubmit: function(messageString) {
-    console.log('handled the message');
     var message = {
-      username: 'usernamePlaceholder',
+      username: app.username,
       text: messageString,
-      roomname: 'roomPlaceholder'
+      roomname: $('.messageForm :input')[1].value || $('select :selected').text()
     };
+    console.log(message);
+    // console.log(message);
+    app.send(message);
   }
 };
 
 
 $(document).ready(function(){
   app.init();
+  // app.username = prompt('Choose a username: ', 'Captain Planet') || 'anonymous';
+  app.username = 'Ant Man';
+  console.log(app.username);
   $('body').on( "click", '.username', function(event){
-    // var friend = $(this).$('.username').val();
-    app.addFriend();
-    console.log('added friend');
+    app.addFriend($(this).text());
+    // console.log('added friend');
   });
 
   $('.messageForm').submit(function(event) {
-    // get all the inputs into an array.
     var $inputs = $('.messageForm :input');
-
     var messageString = $inputs[0].value;
-
-    console.log(messageString);
-
     app.handleSubmit(messageString);
+    //To Do maybe something to reset field
     event.preventDefault();
   });
-
-  // debugger;
   app.fetch();
-  // console.log(chats);
-  // console.log(typeof chats);
-  // for(var i=0; i<chats.length; i++){
-  //   app.addMessage(chats[i]);
-  // }
-
-
+  setInterval(app.fetch, 2000);
+  // app.fetch();
 });
+
+
 

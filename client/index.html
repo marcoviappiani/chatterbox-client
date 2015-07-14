@@ -16,12 +16,19 @@
     <div id="main">
       <h1>chatterbox</h1>
       <!-- Your HTML goes here! -->
-      <form class = 'messageForm' id='send'>
-      Message<br>
-      <input type="text" name="message" id='message'>
-      <input type="submit" value="submit" class='submit'>
-      </form>
       <div id='roomSelect'>
+        <select>
+          <option>Lobby</option>
+        </select>
+      <form class = 'messageForm' id='send'>
+        Send Message<br>
+        <input type="text" name="message" id='message'>
+        <br>
+        <br>
+        Create new Room<br>
+        <input type="text" name="room" id='room'>
+        <input type="submit" value="submit" class='submit'>
+      </form>
         <div id='chats'>
           
         </div>
@@ -29,3 +36,10 @@
     </div>
   </body>
 </html>
+
+
+<!-- <select>
+    <option value="" disabled="disabled" selected="selected">Please select a name</option>
+    <option value="1">One</option>
+    <option value="2">Two</option>
+</select> -->
